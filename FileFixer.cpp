@@ -3,11 +3,14 @@
 #include <vector>
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 
 namespace fs = std::filesystem;
 
 // TODO: Create makefile
 // TODO: Think of more things to put in here
+// TODO: Possibly cmake?
+
 const std::vector<std::pair<std::string, std::vector<std::string>>> fileMappings = {
 	{"src",			{".cpp", ".c", ".o"}},
 	{"include",		{".h", ".hpp"}},
@@ -46,8 +49,49 @@ void SortIntoFolders() {
 	}
 }
 
-int main() {
+// This function requires the enabling of a flag -m
+// NOTE: Currently a flag manager IS NOT in use, if multiple flags are needed one will be used
+void GenerateMakeFile() {
+	// Create the bin directory
+	fs::create_directory("bin");
+
+	std::vector<std::string> makefileLines;
+
+	makefileLines.push_back("CXX = g++");
+	makefileLines.push_back("CXXFLAGS = -Wall -Wextra -Iinclude -std=c++17");
+
+	makefileLines.push_back("SRC = $(wildcard src/*.cpp)");
+	makefileLines.push_back("OBJ = $(SRC:src/%.cpp=build/%.o)");
+	makefileLines.push_back("TARGET = bin/my_app");
+	makefileLines.push_back("");
+	makefileLines.push_back("all: $(TARGET)");
+	makefileLines.push_back("");
+	makefileLines.push_back("$(TARGET): $(OBJ)");
+	makefileLines.push_back("\t$(CXX) $(OBJ) -o $(TARGET)");
+	makefileLines.push_back("");
+	makefileLines.push_back("build/%.o: src/%.cpp");
+	makefileLines.push_back("\tmkdir -p build");
+	makefileLines.push_back("\t$(CXX) $(CXXFLAGS) -c $< -o $@");
+	makefileLines.push_back("");
+	makefileLines.push_back("clean:");
+	makefileLines.push_back("\trm -rf build/* $(TARGET)");
+	makefileLines.push_back("");
+	makefileLines.push_back(".PHONY: all clean");
+
+	// Write to file
+	std::ofstream outFile("Makefile");
+	for (const auto& line : makefileLines) {
+		outFile << line << "\n";
+	}
+	outFile.close();}
+
+int main(int argc, char *argv[]) {
 	SortIntoFolders();
+	
+	// Rudimentary flag detection
+	if (argc > 1) {
+		if (std::string(argv[1]) == "-m") GenerateMakeFile();
+	}
 
 	return 0;
 }
