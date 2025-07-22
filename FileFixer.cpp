@@ -4,12 +4,26 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <map>
+#include <functional>
 
 namespace fs = std::filesystem;
 
-// TODO: Create makefile
 // TODO: Think of more things to put in here
 // TODO: Possibly cmake?
+
+
+// Forward declarations for flag options
+void GenerateMakeFile();
+void ShowHelp();
+
+const std::map<std::string, std::function<void()>> flagActions = {
+	{"-m", GenerateMakeFile},
+	{"--make", GenerateMakeFile},
+	{"-h", ShowHelp},
+	{"--help", ShowHelp},
+	{"-v", [](){std::cout << "FileFixer v0.1.0\n"; }}
+};
 
 const std::vector<std::pair<std::string, std::vector<std::string>>> fileMappings = {
 	{"src",			{".cpp", ".c", ".o"}},
@@ -50,6 +64,7 @@ void SortIntoFolders() {
 }
 
 // This function requires the enabling of a flag -m
+// TODO: More complex makefiles (account for all fileMappings)
 // NOTE: Currently a flag manager IS NOT in use, if multiple flags are needed one will be used
 void GenerateMakeFile() {
 	// Create the bin directory
@@ -83,15 +98,32 @@ void GenerateMakeFile() {
 	for (const auto& line : makefileLines) {
 		outFile << line << "\n";
 	}
-	outFile.close();}
+	outFile.close();
+}
+
+void ShowHelp() {
+
+}
+
+// Flag manager
+// TODO: Flag dependencies
+void ParseFlags(int argc, char* argv[]) {
+	// No arguments provided, default behaviour
+	if (argc >= 2) return;
+
+	// Ignore invalid flags
+	for (int i = 1; i < argc; ++i) {
+		std::string flag = argv[i];
+		auto it  = flagActions.find(flag);
+
+		if (it != flagActions.end()) it->second();
+	}
+}
 
 int main(int argc, char *argv[]) {
+	ParseFlags(argc, argv);
+
 	SortIntoFolders();
-	
-	// Rudimentary flag detection
-	if (argc > 1) {
-		if (std::string(argv[1]) == "-m") GenerateMakeFile();
-	}
 
 	return 0;
 }
