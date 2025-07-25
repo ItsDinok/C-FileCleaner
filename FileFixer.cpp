@@ -102,7 +102,14 @@ void GenerateMakeFile() {
 }
 
 void ShowHelp() {
-
+	std::cout << "------------------------------------------------------------" << std::endl;
+	std::cout << "FileFixer help:" << std::endl;
+	std::cout << "FileFixer: Restructures file system" << std::endl;
+	std::cout << "-m: Generates make file, works as a flag" << std::endl;
+	std::cout << "--make: Generates make file, works as a flag" << std::endl;
+	std::cout << "-h: Shows help menu, but you knew that anyway" << std::endl;
+	std::cout << "-v: Shows version information" << std::endl;
+	std::cout << "------------------------------------------------------------" << std::endl;
 }
 
 // Flag manager
