@@ -9,28 +9,60 @@
 
 namespace fs = std::filesystem;
 
-// TODO: Think of more things to put in here
+// TODOList
 // TODO: Possibly cmake?
-
 
 // Forward declarations for flag options
 void GenerateMakeFile();
 void ShowHelp();
+void CleanStructures();
+void RunAfterConclusion();
+void ShowFileStructure();
+void ListMisplaced();
+void SaveTarget();
+void SaveVersion();
+void SaveOptimisation();
 
+// TODO: Think of more things to put in here
 const std::map<std::string, std::function<void()>> flagActions = {
 	{"-m", GenerateMakeFile},
 	{"--make", GenerateMakeFile},
 	{"-h", ShowHelp},
 	{"--help", ShowHelp},
-	{"-v", [](){std::cout << "FileFixer v0.1.0\n"; }}
+	{"-v", [](){std::cout << "FileFixer v0.1.0\n"; }},
+	{"-c", CleanStructures},
+	{"--clean", CleanStructures},
+	{"-r", RunAfterConclusion},
+	{"--run", RunAfterConclusion},
+	{"-s", ShowFileStructure},
+	{"--structure", ShowFileStructure},
+	{"--list-misplaced", ListMisplaced},
+
+	// These require things after their declaration
+	{"--target", SaveTarget},
+	{"--std", SaveVersion},
+	{"--optimisation", SaveOptimisation}
 };
 
+// TODO: Think of more things to put in here
 const std::vector<std::pair<std::string, std::vector<std::string>>> fileMappings = {
 	{"src",			{".cpp", ".c", ".o"}},
 	{"include",		{".h", ".hpp"}},
 	{"lib",			{".dll", ".so", ".a"}},
 	{"assets",		{".png", ".jpg", ".mp3"}},
 	{"text",		{".txt"}}
+};
+
+std::map<std::string, std::string> programState = {
+	{"mainFolder", ""},
+	{"optimisationLevel", ""},
+	{"c++Version", "17"},
+
+	// Bools
+	{"listMisplaced", "false"},
+	{"showStructure", "false"},
+	{"runAfterConclusion", "false"},
+	{"cleanStructures", "false"}
 };
 
 std::string GetFolderForFile(const std::string& ext) {
@@ -65,7 +97,6 @@ void SortIntoFolders() {
 
 // This function requires the enabling of a flag -m
 // TODO: More complex makefiles (account for all fileMappings)
-// NOTE: Currently a flag manager IS NOT in use, if multiple flags are needed one will be used
 void GenerateMakeFile() {
 	// Create the bin directory
 	fs::create_directory("bin");
@@ -73,7 +104,11 @@ void GenerateMakeFile() {
 	std::vector<std::string> makefileLines;
 
 	makefileLines.push_back("CXX = g++");
-	makefileLines.push_back("CXXFLAGS = -Wall -Wextra -Iinclude -std=c++17");
+
+	std::string cxxFlags = "CXXFLAGS = -Wall -Wextra -Iinclude";
+	if (programState["optimisationLevel"] != "") cxxFlags += programState["optimisationLevel"];
+	cxxFlags+=(programState["c++Version"]);
+	makefileLines.push_back(cxxFlags);
 
 	makefileLines.push_back("SRC = $(wildcard src/*.cpp)");
 	makefileLines.push_back("OBJ = $(SRC:src/%.cpp=build/%.o)");
@@ -110,6 +145,30 @@ void ShowHelp() {
 	std::cout << "-h: Shows help menu, but you knew that anyway" << std::endl;
 	std::cout << "-v: Shows version information" << std::endl;
 	std::cout << "------------------------------------------------------------" << std::endl;
+}
+
+// This deletes files such as build and obj files
+// Similar to a makefile clean build
+void CleanStructures() {
+}
+
+// This runs the built item after conclusion
+void RunAfterConclusion() {
+}
+
+void ShowFileStructure() {
+}
+
+void SaveOptimisation() {
+}
+
+void SaveVersion() {
+}
+
+void SaveTarget() {
+}
+
+void ListMisplaced() {
 }
 
 // Flag manager
